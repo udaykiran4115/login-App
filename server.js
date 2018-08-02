@@ -1,43 +1,48 @@
 var express = require('express');
 var app = express();
-var port = process.env.PORT || 8000;
+var port = process.env.PORT || 8080;
 
-var morgan = require('morgan');
 var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser')
 var session = require('express-session');
+var morgan = require('morgan');
 var mongoose = require('mongoose');
-var passport = require('passport')
-var flash = require('connect-flash')
+var bodyParser = require('body-parser');
+var passport = require('passport');
+var flash = require('connect-flash');
 
-//conect to dataBase
+
 mongoose.connect('mongodb://localhost/test');
-require('./config/passport')(passport)
+require('./config/passport')(passport);
 
-app.use(morgan('dev'))
-app.use(cookieParser())
-app.use(bodyParser.urlencoded({extended: false}))
-app.use(session({
-  secret:'secret',
-  saveUninitialized:true,
-  resave: true
-}))
-//initialize the passport function
+app.use(morgan('dev'));
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(session({secret: 'anystringoftext',
+				 saveUninitialized: true,
+				 resave: true}));
+
 app.use(passport.initialize());
-//passport uses previous session
-app.use(passport.session());
-//to make sure all of our flash messages are udated
-app.use(flash())
+app.use(passport.session()); // persistent login sessions
+app.use(flash()); // use connect-flash for flash messages stored in session
 
-app.set('view engine', 'ejs')
 
-require('./app/route.js')(app, passport)
-/*app.use('/', function (req, res){
-  res.send("Here is our First EXpress program...")
-  console.log(req.cookie)
-  console.log("######################################################")
-  console.log(req.session)
-})
-*/
-app.listen(port)
-console.log("Server listening at port "+port)
+
+
+app.set('view engine', 'ejs');
+
+
+// app.use('/', function(req, res){
+// 	res.send('Our First Express program!');
+// 	console.log(req.cookies);
+// 	console.log('================');
+// 	console.log(req.session);
+// });
+
+require('./app/routes.js')(app, passport);
+
+app.listen(port);
+console.log('Server running on port: ' + port);
+
+
+
+
